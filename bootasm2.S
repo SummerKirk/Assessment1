@@ -38,9 +38,16 @@ cons_writeline:
     call    cons_write_crlf
     ret    
 
+swap_to_VGA:
+    movb    $0, %ah             # ensure ah is 0 for the interupt
+    movb    $0x13, %al,         # put 0x13 into al for the interupt
+    int     $0x10               # run interupt 10, this swaps to VGA mode
+
 real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
+
+    call    swap_to_VGA
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
