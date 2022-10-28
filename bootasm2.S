@@ -120,7 +120,7 @@ Plot_Pixel:
 
     movw x1(%bp), %dx
     cmp x0(%bp), %dx       # x0 = x1
-    jne Re_Calc_Plot_Pixel                 # not? continue
+    jne Re_Calc_Plot_Pixel               # not? continue
     movw y1(%bp), %dx
     cmp y0(%bp), %dx        # y0 = y1
     jne Re_Calc_Plot_Pixel      # not? continue
