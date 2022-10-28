@@ -40,7 +40,7 @@ cons_writeline:
 
 swap_to_VGA:
     movb    $0, %ah             # ensure ah is 0 for the interupt
-    movb    $0x13, %al,         # put 0x13 into al for the interupt
+    movb    $0x13, %al          # put 0x13 into al for the interupt
     int     $0x10               # run interupt 10, this swaps to VGA mode
 
 #define sx  -22
@@ -57,16 +57,16 @@ swap_to_VGA:
 
 Draw_Line:
     pushw %bp
-    movq %sp, %bp
+    movw %sp, %bp
     subw $4, %sp                # primary stackprep done
-    movw %al, col(%bp)
-    movw %dh, y1(%bp)
-    movw %dl, y0(%bp)
-    movw %ch, x1(%bp)
-    movw %cl, x0(%bp)           # COMMENT put values on stack so i can use the int function
+    movb %al, col(%bp)
+    movb %dh, y1(%bp)
+    movb %dl, y0(%bp)
+    movb %ch, x1(%bp)
+    movb %cl, x0(%bp)           # COMMENT put values on stack so i can use the int function
 
     movw x1(%bp), %ax
-    isub x0(bp), %ax            # xend-xstart
+    isubw x0(%bp), %ax            # xend-xstart
     cmp %ax, $0                 # see if it's more than 0
     jae Absoloute_Y
     imulw $-1, %ax              # when it's less than 0, make it positive
@@ -95,18 +95,18 @@ StepY_Comp:
     movw sx(%bp), $-1
 
 Err_Comp:
-    movb dstepx(%bp), %ax
+    movw dstepx(%bp), %ax
     isubw dstepy(%bp), %ax          # err = dx - dy
-    movb %ax, err(%bp)
+    movw %ax, err(%bp)
 
-    movb dstepy(%bp), %ax
+    movw dstepy(%bp), %ax
     imulw $-1, %ax
     movw %ax, dstepy(%bp)           # make dy negative as the algorithm always asks for -dy from here on in
 
 Plot_Pixel:
 # faff with reges to have ah 0x0x, al colour, bh 0, cx column, dx row them int 10
-    movw $0x0c, %ah
-    movw col(%bp), %al
+    movb $0x0c, %ah
+    movb col(%bp), %al
     movw x0(%bp), %cx
     movw y0(%bp), %dx           # sort out reges
     int $0x10                   # draw the pixel
@@ -153,11 +153,11 @@ real_start:
 
     call    swap_to_VGA         # change to VGA mode
 
-    movw %al $5
-    movw %cl $24
-    movw %ch $34
-    movw %dl $44
-    movw %dh $54
+    movb %al, $5
+    movb %cl, $24
+    movb %ch, $34
+    movb %dl, $44
+    movb %dh, $54
     call Draw_Line              # draw a line
 
 endless_loop:                   # Loop forever more
