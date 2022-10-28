@@ -106,7 +106,7 @@ Err_Comp:
 Plot_Pixel:
 # faff with reges to have ah 0x0x, al colour, bh 0, cx column, dx row them int 10
     movw $0x0c, %ah
-    movw c(%bp), %al
+    movw col(%bp), %al
     movw x0(%bp), %cx
     movw y0(%bp), %dx           # sort out reges
     int $0x10                   # draw the pixel
@@ -119,14 +119,27 @@ Plot_Pixel:
 
 Re_Calc_Plot_Pixel:
     movw eer(%bp), %ax          
-    imulw err(%bp) # e2 = 2xerr
+    imulw err(%bp), $2          # e2 = 2xerr
+
     movw %ax, e2(%bp)
-    cmp e2(%bp), dstepy(%bp) # e2 > -dy then
-     #   err = err-dy (dy negative so +dstepy --> +(-dstepy))
-     #   xo = x0 +sx
-     # e2 < dx then
-     #   err = err+dx
-     #   xo = y0 +sy
+    cmp e2(%bp), dstepy(%bp)    # e2 > -dy then
+    jae E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
+    movw eer(%bp), %ax
+    iaddw %ax, dstepy(%bp)      #   err = err-dy (dy negative so +dstepy --> +(-dstepy))
+    movw %ax, err(%bp)
+    movw x0(%bp), %ax
+    iaddw sx(%bp), %ax          #   xo = x0 +sx
+    movw %ax, x0(%bp)
+E2_Dx_Calc_Plot_Pixel:
+    movw %ax, e2(%bp)
+    cmp e2(%bp), dstepx(%bp)    # e2 < dx then
+    jbe Plot_Pixel              # failing the check, loop
+    movw %ax, err(%bp)          
+    iaddw %ax, dstepx(%bp)      #   err = err+dx
+    movw %ax, err(%bp)
+    movw y0(%bp), %ax
+    iaddw sy(%bp), %ax          #   xo = y0 +sy
+    movw %ax, y0(%bp)
      
     jmp Plot_Pixel
 
