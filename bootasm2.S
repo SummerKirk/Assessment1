@@ -50,6 +50,7 @@ swap_to_VGA:
 #define e2  -16
 #define dstepy  -14
 #define dstepx  -12
+# ^local calculated, v also local
 #define x0  -10
 #define x1  -8
 #define y0  -6
@@ -68,32 +69,36 @@ Draw_Line:
 
     movw x1(%bp), %ax
     subw x0(%bp), %ax           # xend-xstart
-    cmp %ax, $0                 # see if it's more than 0
+    cmp $0, %ax                # see if it's more than 0
     jae Absoloute_Y
-    imulw $-1                   # when it's less than 0, make it positive
+    movw $-1, %dx
+    imul %dx                   # when it's less than 0, make it positive
     
 Absoloute_Y:
     movw %ax, dstepx(%bp)       # x's value into the stack
 
     movw y1(%bp), %ax
     sub y0(%bp), %ax             # yend - ystart
-    cmp %ax, $0                 # see if it's more than 0
+    cmp $0, %ax                 # see if it's more than 0
     jae StepX_Comp
-    imulw $-1                   # when it's less than 0, make it positive
+    movw $-1, %dx
+    imul %dx                  # when it's less than 0, make it positive
 
 StepX_Comp:
     movw %ax, dstepy(%bp)       # y's value into stack
 
-    cmp x0(%bp), x1(%bp)        # x0 < x1 figure out if x step is positive or negative
-    movw sx(%bp), $1            # will set pos before jump, will fall through and alter if negative
-    jae SY_Comp
-    movw sx(%bp), $-1
+    movw x1(%bp), %dx
+    cmp x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
+    movw $1 , sx(%bp)           # will set pos before jump, will fall through and alter if negative
+    jae StepY_Comp
+    movw $-1, sx(%bp)
 
 StepY_Comp:
-    cmp x0(%bp), x1(%bp)        # x0 < x1 figure out if y step is positive or negative
-    movw sx(%bp), $1            # will set pos before jump, will fall through and alter if negative
+    movw y1(%bp), %dx
+    cmp y0(%bp), %dx        # x0 < x1 figure out if y step is positive or negative
+    movw $1, sx(%bp)            # will set pos before jump, will fall through and alter if negative
     jae Err_Comp
-    movw sx(%bp), $-1
+    movw $11, sx(%bp)
 
 Err_Comp:
     movw dstepx(%bp), %ax
@@ -101,7 +106,8 @@ Err_Comp:
     movw %ax, err(%bp)
 
     movw dstepy(%bp), %ax
-    imulw $-1
+    movw $-1, %dx
+    imulw %dx
     movw %ax, dstepy(%bp)       # make dy negative as the algorithm always asks for -dy from here on in
 
 Plot_Pixel:
@@ -112,20 +118,24 @@ Plot_Pixel:
     movw y0(%bp), %dx           # sort out reges
     int $0x10                   # draw the pixel
 
-    cmp x0(%bp), x1(%bp)        # x0 = x1
-    jne re_calc                 # not? continue
-    cmp y0(%bp), y1(%bp)        # y0 = y1
+    movw x1(%bp), %dx
+    cmp x0(%bp), %dx       # x0 = x1
+    jne Re_Calc_Plot_Pixel                 # not? continue
+    movw y1(%bp), %dx
+    cmp y0(%bp), %dx        # y0 = y1
     jne Re_Calc_Plot_Pixel      # not? continue
     jmp End_Of_Draw_Line        # is? exit loop
 
 Re_Calc_Plot_Pixel:
-    movw eer(%bp), %ax          
-    imulw $2                   # e2 = 2xerr
+    movw err(%bp), %ax
+    movw $2, %dx          
+    imulw %dx                   # e2 = 2xerr
+    movw %ax, e2(%bp)           # contents of ax into e2
 
-    movw %ax, e2(%bp)
-    cmp e2(%bp), dstepy(%bp)    # e2 > -dy then
+    movw dstepy(%bp), %dx
+    cmp e2(%bp), %dx    # e2 > -dy then
     jae E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
-    movw eer(%bp), %ax
+    movw err(%bp), %ax
     addw %ax, dstepy(%bp)      #   err = err-dy (dy negative so +dstepy --> +(-dstepy))
     movw %ax, err(%bp)
     movw x0(%bp), %ax
@@ -133,7 +143,9 @@ Re_Calc_Plot_Pixel:
     movw %ax, x0(%bp)
 E2_Dx_Calc_Plot_Pixel:
     movw %ax, e2(%bp)
-    cmp e2(%bp), dstepx(%bp)    # e2 < dx then
+
+    movw dstepx(%bp), %dx
+    cmp e2(%bp), %dx            # e2 < dx then
     jbe Plot_Pixel              # failing the check, loop
     movw %ax, err(%bp)          
     addw %ax, dstepx(%bp)      #   err = err+dx
@@ -154,11 +166,11 @@ real_start:
 
     call    swap_to_VGA         # change to VGA mode
 
-    movb %al, $5
-    movb %cl, $24
-    movb %ch, $34
-    movb %dl, $44
-    movb %dh, $54
+    movb $5, %al
+    movb $24, %cl 
+    movb $34, %ch 
+    movb $44, %dl 
+    movb $54, %dh 
     call Draw_Line              # draw a line
 
 endless_loop:                   # Loop forever more
