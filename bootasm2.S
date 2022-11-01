@@ -77,7 +77,7 @@ Draw_Line:
     imul    %dx                 # when it's less than 0, make it positive
     
 Absoloute_Y:
-    movw    %ax, dvalx(%bp)    # x's value into the stack stack is target
+    movw    %ax, dvalx(%bp)     # dvalx into bp, bp is target
 
     movw    y1(%bp), %ax
     sub     y0(%bp), %ax        # yend - ystart, y1 is target
@@ -87,30 +87,30 @@ Absoloute_Y:
     imul    %dx                 # when it's less than 0, make it positive
 
 StepX_Comp:
-    movw    %ax, dvaly(%bp)    # y's value into stack
+    movw    %ax, dvaly(%bp)     # dvaly's into bp, bp is target
 
     movw    x1(%bp), %dx
     cmp     x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
     movw    $1 , sx(%bp)        # will set pos before jump, will fall through and alter if negative
     jae     StepY_Comp
-    movw    $-1, stepx(%bp)
+    movw    $-1, stepx(%bp)     # stepx to -1, bp is target
 
 StepY_Comp:
     movw    y1(%bp), %dx
     cmp     y0(%bp), %dx        # x0 < x1 figure out if y step is positive or negative
-    movw    $1, sx(%bp)         # will set pos before jump, will fall through and alter if negative
+    movw    $1, stepy(%bp)      # will set pos before jump, will fall through and alter if negative
     jae     Err_Comp
-    movw    $11, stepx(%bp)
+    movw    $-1, stepy(%bp)     # step y to -1
 
 Err_Comp:
-    movw    dstepx(%bp), %ax
-    subw    dstepy(%bp), %ax    # err = dx - dy, dstepx is target
-    movw    %ax, err(%bp)
+    movw    dvalx(%bp), %ax     # bring dx into ax
+    subw    dvaly(%bp), %ax     # err = dx - dy, dstepx is target
+    movw    %ax, err(%bp)       # save err
 
-    movw    dstepy(%bp), %ax
+    movw    dvaly(%bp), %ax     # bring dy into ax
     movw    $-1, %dx
     imulw   %dx
-    movw    %ax, dstepy(%bp)    # make dy negative as the algorithm always asks for -dy from here on in
+    movw    %ax, dvaly(%bp)     # make dy negative as the algorithm always asks for -dy from here on in
 
 Plot_Pixel:
 # faff with reges to have ah 0x0x, al colour, bh 0, cx column, dx row them int 10
@@ -134,26 +134,26 @@ Re_Calc_Plot_Pixel:
     imulw   %dx                 # e2 = 2xerr
     movw    %ax, e2(%bp)        # contents of ax into e2
 
-    movw    dstepy(%bp), %dx
+    movw    dvaly(%bp), %dx     # dy into dx
     cmp     e2(%bp), %dx        # e2 > -dy then
     jae     E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
     movw    err(%bp), %ax
-    addw    dstepy(%bp), %ax    # err = err-dy (dy was made negative), err is target
+    addw    dvaly(%bp), %ax     # err = err-dy (dy was made negative), err is target
     movw    %ax, err(%bp)
     movw    x0(%bp), %ax
-    addw    sx(%bp), %ax        # xo = x0 +sx, x0 is target
+    addw    stepx(%bp), %ax     # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 E2_Dx_Calc_Plot_Pixel:
     movw    e2(%bp), %ax        # bring out e2 into Ax
-    movw    dstepx(%bp), %dx    # bring dstepx into Dx
+    movw    dvalx(%bp), %dx     # bring dx into Dx reg
     cmp     e2(%bp), %dx        # e2 < dx then
     jbe     Plot_Pixel          # failing the check, loop
 
     movw    %ax, err(%bp)          
-    addw    dstepx(%bp), %ax    # err = err+dx, err is target
+    addw    dvalx(%bp), %ax     # err = err+dx, err is target
     movw    %ax, err(%bp)
     movw    y0(%bp), %ax
-    addw    sy(%bp), %ax        # xo = y0 +sy, y0 is target
+    addw    stepy(%bp), %ax     # xo = y0 +sy, y0 is target
     movw    %ax, y0(%bp)        # save ax into y0
      
     jmp Plot_Pixel
