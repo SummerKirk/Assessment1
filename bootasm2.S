@@ -91,7 +91,7 @@ StepX_Comp:
 
     movw    x1(%bp), %dx
     cmp     x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
-    movw    $1 , sx(%bp)        # will set pos before jump, will fall through and alter if negative
+    movw    $1 , stepx(%bp)     # will set pos before jump, will fall through and alter if negative
     jae     StepY_Comp
     movw    $-1, stepx(%bp)     # stepx to -1, bp is target
 
@@ -121,7 +121,7 @@ Plot_Pixel:
     int     $0x10               # draw the pixel
 
     movw    x1(%bp), %dx
-    cmp     x0(%bp), %dx        # x0 = x1
+    cmp     x0(%bp), %dx        # x0 = x1 (if they are equal, we are at the end)
     jne     Re_Calc_Plot_Pixel  # not? continue
     movw    y1(%bp), %dx
     cmp     y0(%bp), %dx        # y0 = y1
@@ -135,8 +135,8 @@ Re_Calc_Plot_Pixel:
     movw    %ax, e2(%bp)        # contents of ax into e2
 
     movw    dvaly(%bp), %dx     # dy into dx
-    cmp     e2(%bp), %dx        # e2 > -dy then
-    jae     E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
+    cmp     %dx, e2(%bp)        # e2 > -dy then calc
+    jbe     E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
     movw    err(%bp), %ax
     addw    dvaly(%bp), %ax     # err = err-dy (dy was made negative), err is target
     movw    %ax, err(%bp)
@@ -146,8 +146,8 @@ Re_Calc_Plot_Pixel:
 E2_Dx_Calc_Plot_Pixel:
     movw    e2(%bp), %ax        # bring out e2 into Ax
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
-    cmp     e2(%bp), %dx        # e2 < dx then
-    jbe     Plot_Pixel          # failing the check, loop
+    cmp     %dx, e2(%bp)        # e2 < dx then calc
+    jae     Plot_Pixel          # failing the check, skip to loop
 
     movw    %ax, err(%bp)          
     addw    dvalx(%bp), %ax     # err = err+dx, err is target
@@ -156,7 +156,7 @@ E2_Dx_Calc_Plot_Pixel:
     addw    stepy(%bp), %ax     # xo = y0 +sy, y0 is target
     movw    %ax, y0(%bp)        # save ax into y0
      
-    jmp Plot_Pixel
+    jmp Plot_Pixel              # after calcs we loop
 
 End_Of_Draw_Line:
     ret
