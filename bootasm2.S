@@ -38,18 +38,20 @@ cons_writeline:
     call    cons_write_crlf
     ret    
 
+# COMMENT SWAP TO VIDEO MODE
 swap_to_VGA:
     movb    $0, %ah             # ensure ah is 0 for the interupt
     movb    $0x13, %al          # put 0x13 into al for the interupt
     int     $0x10               # run interupt 10, this swaps to VGA mode
     ret
 
-#define sx  -22
-#define sy  -20
+# COMMENT BEGIN DRAW SINGLE LINE
+#define stepx  -22
+#define stepy  -20
 #define err -18
 #define e2  -16
-#define dstepy  -14
-#define dstepx  -12
+#define dvaly  -14
+#define dvalx  -12
 # ^local calculated, v also local
 #define x0  -10
 #define x1  -8
@@ -60,49 +62,49 @@ swap_to_VGA:
 Draw_Line:
     pushw   %bp
     movw    %sp, %bp
-    subw    $4, %sp             # primary stackprep done
-    movb    %al, col(%bp)
+    subw    $4, %sp             # primary stackprep done so i can store local variables
+    movb    %al, col(%bp)       # values into stack, bp is target
     movb    %dh, y1(%bp)
     movb    %dl, y0(%bp)
     movb    %ch, x1(%bp)
     movb    %cl, x0(%bp)        # COMMENT put values on stack so i can use the int function
 
-    movw    x1(%bp), %ax
-    subw    x0(%bp), %ax        # xend-xstart
+    movw    x1(%bp), %ax        # x1 into ax
+    subw    x0(%bp), %ax        # xend-xstart, x1 is target
     cmp     $0, %ax             # see if it's more than 0
     jae     Absoloute_Y
-    movw    $-1, %dx
+    movw    $-1, %dx            # -1 into dx as multiply takes a register
     imul    %dx                 # when it's less than 0, make it positive
     
 Absoloute_Y:
-    movw    %ax, dstepx(%bp)    # x's value into the stack
+    movw    %ax, dvalx(%bp)    # x's value into the stack stack is target
 
     movw    y1(%bp), %ax
-    sub     y0(%bp), %ax        # yend - ystart
+    sub     y0(%bp), %ax        # yend - ystart, y1 is target
     cmp     $0, %ax             # see if it's more than 0
     jae     StepX_Comp
     movw    $-1, %dx
     imul    %dx                 # when it's less than 0, make it positive
 
 StepX_Comp:
-    movw    %ax, dstepy(%bp)    # y's value into stack
+    movw    %ax, dvaly(%bp)    # y's value into stack
 
     movw    x1(%bp), %dx
     cmp     x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
     movw    $1 , sx(%bp)        # will set pos before jump, will fall through and alter if negative
     jae     StepY_Comp
-    movw    $-1, sx(%bp)
+    movw    $-1, stepx(%bp)
 
 StepY_Comp:
     movw    y1(%bp), %dx
     cmp     y0(%bp), %dx        # x0 < x1 figure out if y step is positive or negative
     movw    $1, sx(%bp)         # will set pos before jump, will fall through and alter if negative
     jae     Err_Comp
-    movw    $11, sx(%bp)
+    movw    $11, stepx(%bp)
 
 Err_Comp:
     movw    dstepx(%bp), %ax
-    subw    dstepy(%bp), %ax    # err = dx - dy
+    subw    dstepy(%bp), %ax    # err = dx - dy, dstepx is target
     movw    %ax, err(%bp)
 
     movw    dstepy(%bp), %ax
@@ -136,29 +138,29 @@ Re_Calc_Plot_Pixel:
     cmp     e2(%bp), %dx        # e2 > -dy then
     jae     E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
     movw    err(%bp), %ax
-    addw    %ax, dstepy(%bp)    # err = err-dy (dy negative so +dstepy --> +(-dstepy))
+    addw    dstepy(%bp), %ax    # err = err-dy (dy was made negative), err is target
     movw    %ax, err(%bp)
     movw    x0(%bp), %ax
-    addw    sx(%bp), %ax        # xo = x0 +sx
-    movw    %ax, x0(%bp)
+    addw    sx(%bp), %ax        # xo = x0 +sx, x0 is target
+    movw    %ax, x0(%bp)        # save ax into x0
 E2_Dx_Calc_Plot_Pixel:
-    movw    %ax, e2(%bp)        # bring out e2
-
-    movw    dstepx(%bp), %dx
+    movw    e2(%bp), %ax        # bring out e2 into Ax
+    movw    dstepx(%bp), %dx    # bring dstepx into Dx
     cmp     e2(%bp), %dx        # e2 < dx then
     jbe     Plot_Pixel          # failing the check, loop
+
     movw    %ax, err(%bp)          
-    addw    %ax, dstepx(%bp)    #   err = err+dx
+    addw    dstepx(%bp), %ax    # err = err+dx, err is target
     movw    %ax, err(%bp)
     movw    y0(%bp), %ax
-    addw    sy(%bp), %ax        #   xo = y0 +sy
-    movw    %ax, y0(%bp)
+    addw    sy(%bp), %ax        # xo = y0 +sy, y0 is target
+    movw    %ax, y0(%bp)        # save ax into y0
      
     jmp Plot_Pixel
 
 End_Of_Draw_Line:
     ret
-
+# COMMENT END OF DRAW SINGLE LINE
 
 real_start:
     movw    $boot_message, %si  # Display our boot message
