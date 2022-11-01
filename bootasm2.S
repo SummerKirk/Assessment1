@@ -58,101 +58,101 @@ swap_to_VGA:
 #define col   -2
 
 Draw_Line:
-    pushw %bp
-    movw %sp, %bp
-    subw $4, %sp                # primary stackprep done
-    movb %al, col(%bp)
-    movb %dh, y1(%bp)
-    movb %dl, y0(%bp)
-    movb %ch, x1(%bp)
-    movb %cl, x0(%bp)           # COMMENT put values on stack so i can use the int function
+    pushw   %bp
+    movw    %sp, %bp
+    subw    $4, %sp             # primary stackprep done
+    movb    %al, col(%bp)
+    movb    %dh, y1(%bp)
+    movb    %dl, y0(%bp)
+    movb    %ch, x1(%bp)
+    movb    %cl, x0(%bp)        # COMMENT put values on stack so i can use the int function
 
-    movw x1(%bp), %ax
-    subw x0(%bp), %ax           # xend-xstart
-    cmp $0, %ax                # see if it's more than 0
-    jae Absoloute_Y
-    movw $-1, %dx
-    imul %dx                   # when it's less than 0, make it positive
+    movw    x1(%bp), %ax
+    subw    x0(%bp), %ax        # xend-xstart
+    cmp     $0, %ax             # see if it's more than 0
+    jae     Absoloute_Y
+    movw    $-1, %dx
+    imul    %dx                 # when it's less than 0, make it positive
     
 Absoloute_Y:
-    movw %ax, dstepx(%bp)       # x's value into the stack
+    movw    %ax, dstepx(%bp)    # x's value into the stack
 
-    movw y1(%bp), %ax
-    sub y0(%bp), %ax             # yend - ystart
-    cmp $0, %ax                 # see if it's more than 0
-    jae StepX_Comp
-    movw $-1, %dx
-    imul %dx                  # when it's less than 0, make it positive
+    movw    y1(%bp), %ax
+    sub     y0(%bp), %ax        # yend - ystart
+    cmp     $0, %ax             # see if it's more than 0
+    jae     StepX_Comp
+    movw    $-1, %dx
+    imul    %dx                 # when it's less than 0, make it positive
 
 StepX_Comp:
-    movw %ax, dstepy(%bp)       # y's value into stack
+    movw    %ax, dstepy(%bp)    # y's value into stack
 
-    movw x1(%bp), %dx
-    cmp x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
-    movw $1 , sx(%bp)           # will set pos before jump, will fall through and alter if negative
-    jae StepY_Comp
-    movw $-1, sx(%bp)
+    movw    x1(%bp), %dx
+    cmp     x0(%bp), %dx        # x0 < x1 figure out if x step is positive or negative
+    movw    $1 , sx(%bp)        # will set pos before jump, will fall through and alter if negative
+    jae     StepY_Comp
+    movw    $-1, sx(%bp)
 
 StepY_Comp:
-    movw y1(%bp), %dx
-    cmp y0(%bp), %dx        # x0 < x1 figure out if y step is positive or negative
-    movw $1, sx(%bp)            # will set pos before jump, will fall through and alter if negative
-    jae Err_Comp
-    movw $11, sx(%bp)
+    movw    y1(%bp), %dx
+    cmp     y0(%bp), %dx        # x0 < x1 figure out if y step is positive or negative
+    movw    $1, sx(%bp)         # will set pos before jump, will fall through and alter if negative
+    jae     Err_Comp
+    movw    $11, sx(%bp)
 
 Err_Comp:
-    movw dstepx(%bp), %ax
-    subw dstepy(%bp), %ax       # err = dx - dy
-    movw %ax, err(%bp)
+    movw    dstepx(%bp), %ax
+    subw    dstepy(%bp), %ax    # err = dx - dy
+    movw    %ax, err(%bp)
 
-    movw dstepy(%bp), %ax
-    movw $-1, %dx
-    imulw %dx
-    movw %ax, dstepy(%bp)       # make dy negative as the algorithm always asks for -dy from here on in
+    movw    dstepy(%bp), %ax
+    movw    $-1, %dx
+    imulw   %dx
+    movw    %ax, dstepy(%bp)    # make dy negative as the algorithm always asks for -dy from here on in
 
 Plot_Pixel:
 # faff with reges to have ah 0x0x, al colour, bh 0, cx column, dx row them int 10
-    movb $0x0c, %ah
-    movb col(%bp), %al
-    movw x0(%bp), %cx
-    movw y0(%bp), %dx           # sort out reges
-    int $0x10                   # draw the pixel
+    movb    $0x0c, %ah
+    movb    col(%bp), %al
+    movw    x0(%bp), %cx
+    movw    y0(%bp), %dx        # sort out reges
+    int     $0x10               # draw the pixel
 
-    movw x1(%bp), %dx
-    cmp x0(%bp), %dx       # x0 = x1
-    jne Re_Calc_Plot_Pixel               # not? continue
-    movw y1(%bp), %dx
-    cmp y0(%bp), %dx        # y0 = y1
-    jne Re_Calc_Plot_Pixel      # not? continue
-    jmp End_Of_Draw_Line        # is? exit loop
+    movw    x1(%bp), %dx
+    cmp     x0(%bp), %dx        # x0 = x1
+    jne     Re_Calc_Plot_Pixel  # not? continue
+    movw    y1(%bp), %dx
+    cmp     y0(%bp), %dx        # y0 = y1
+    jne     Re_Calc_Plot_Pixel  # not? continue
+    jmp     End_Of_Draw_Line    # is? exit loop
 
 Re_Calc_Plot_Pixel:
-    movw err(%bp), %ax
-    movw $2, %dx          
-    imulw %dx                   # e2 = 2xerr
-    movw %ax, e2(%bp)           # contents of ax into e2
+    movw    err(%bp), %ax
+    movw    $2, %dx          
+    imulw   %dx                 # e2 = 2xerr
+    movw    %ax, e2(%bp)        # contents of ax into e2
 
-    movw dstepy(%bp), %dx
-    cmp e2(%bp), %dx    # e2 > -dy then
-    jae E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
-    movw err(%bp), %ax
-    addw %ax, dstepy(%bp)      #   err = err-dy (dy negative so +dstepy --> +(-dstepy))
-    movw %ax, err(%bp)
-    movw x0(%bp), %ax
-    addw sx(%bp), %ax          #   xo = x0 +sx
-    movw %ax, x0(%bp)
+    movw    dstepy(%bp), %dx
+    cmp     e2(%bp), %dx        # e2 > -dy then
+    jae     E2_Dx_Calc_Plot_Pixel   # failing the check, onto the next one
+    movw    err(%bp), %ax
+    addw    %ax, dstepy(%bp)    # err = err-dy (dy negative so +dstepy --> +(-dstepy))
+    movw    %ax, err(%bp)
+    movw    x0(%bp), %ax
+    addw    sx(%bp), %ax        # xo = x0 +sx
+    movw    %ax, x0(%bp)
 E2_Dx_Calc_Plot_Pixel:
-    movw %ax, e2(%bp)
+    movw    %ax, e2(%bp)        # bring out e2
 
-    movw dstepx(%bp), %dx
-    cmp e2(%bp), %dx            # e2 < dx then
-    jbe Plot_Pixel              # failing the check, loop
-    movw %ax, err(%bp)          
-    addw %ax, dstepx(%bp)      #   err = err+dx
-    movw %ax, err(%bp)
-    movw y0(%bp), %ax
-    addw sy(%bp), %ax          #   xo = y0 +sy
-    movw %ax, y0(%bp)
+    movw    dstepx(%bp), %dx
+    cmp     e2(%bp), %dx        # e2 < dx then
+    jbe     Plot_Pixel          # failing the check, loop
+    movw    %ax, err(%bp)          
+    addw    %ax, dstepx(%bp)    #   err = err+dx
+    movw    %ax, err(%bp)
+    movw    y0(%bp), %ax
+    addw    sy(%bp), %ax        #   xo = y0 +sy
+    movw    %ax, y0(%bp)
      
     jmp Plot_Pixel
 
@@ -166,12 +166,12 @@ real_start:
 
     call    swap_to_VGA         # change to VGA mode
 
-    movb $5, %al
-    movb $24, %cl 
-    movb $34, %ch 
-    movb $44, %dl 
-    movb $54, %dh 
-    call Draw_Line              # draw a line
+    movb    $5, %al
+    movb    $24, %cl 
+    movb    $34, %ch 
+    movb    $44, %dl 
+    movb    $54, %dh 
+    call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
