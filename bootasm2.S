@@ -71,8 +71,8 @@ Draw_Line:
 
     movw    x1(%bp), %ax        # x1 into ax
     subw    x0(%bp), %ax        # xend-xstart, x1 is target
-    cmp     %ax, $0             # compare to 0
-    jae     Absoloute_Y         # already above 0, it's already positive
+    cmp     $0, %ax             # compare to 0
+    jb      Absoloute_Y         # already above 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a register
     imul    %dx                 # when it's less than 0, make it positive
     
@@ -81,8 +81,8 @@ Absoloute_Y:
 
     movw    y1(%bp), %ax        # y1 into ax
     sub     y0(%bp), %ax        # yend - ystart, y1 is target
-    cmp     %ax, $0             # compare to 0, jae ax > 0, jbe ax < 0
-    jae     StepX_Comp          # ax already above 0, it's already positive
+    cmp     $0, %ax             # compare to 0, jae ax > 0, jbe ax < 0
+    jb      StepX_Comp          # ax already above 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a reg
     imul    %dx                 # when it's less than 0, make it positive
 
