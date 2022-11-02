@@ -72,7 +72,7 @@ Draw_Line:
     movw    x1(%bp), %ax        # x1 into ax
     subw    x0(%bp), %ax        # xend-xstart, x1 is target
     cmp     $0, %ax             # compare to 0
-    jb      Absoloute_Y         # already above 0, it's already positive
+    jb      Absoloute_Y         # if 0 < ax, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a register
     imul    %dx                 # when it's less than 0, make it positive
     
@@ -82,7 +82,7 @@ Absoloute_Y:
     movw    y1(%bp), %ax        # y1 into ax
     sub     y0(%bp), %ax        # yend - ystart, y1 is target
     cmp     $0, %ax             # compare to 0, jae ax > 0, jbe ax < 0
-    jb      StepX_Comp          # ax already above 0, it's already positive
+    jb      StepX_Comp          # 0 already below ax, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a reg
     imul    %dx                 # when it's less than 0, make it positive
 
@@ -92,19 +92,19 @@ StepX_Comp:
     movw    x1(%bp), %dx        # x1 into dx, will be target
     cmp     %dx, x0(%bp)        # x1 > x0 
     movw    $1 , stepx(%bp)     # will set pos before jump, will fall through and alter if negative
-    jae     StepY_Comp          # x1 is above x0, step stays at 1
+    jae     StepY_Comp          # x1 > x0, step stays at 1, we skip
     movw    $-1, stepx(%bp)     # stepx changed to -1, bp is target
 
 StepY_Comp:
     movw    y1(%bp), %dx        # y1 into dx, will be target
     cmp     %dx, y0(%bp)        # y1 > y0 figure out if y step is positive or negative
     movw    $1, stepy(%bp)      # will set pos before jump, will fall through and alter if negative
-    jae     Err_Comp            # y1 is above y0, step stays at 1
+    jae     Err_Comp            # y1 > y0, step stays at 1, we skip
     movw    $-1, stepy(%bp)     # step y to -1
 
 Err_Comp:
-    movw    dvalx(%bp), %ax     # bring dx into ax
-    subw    dvaly(%bp), %ax     # err = dx - dy, dstepx is target
+    movw    dvalx(%bp), %ax     # bring dvalx into ax
+    subw    dvaly(%bp), %ax     # err = dx - dy, dvalx is target
     movw    %ax, err(%bp)       # result in ax goes into err
 
     movw    dvaly(%bp), %ax     # bring dy into ax
@@ -137,24 +137,24 @@ Re_Calc_Plot_Pixel:
 
     movw    dvaly(%bp), %dx     # dy into dx
     cmp     e2(%bp), %dx        # e2 > -dy we continue, e2 is target
-    jbe     E2_Dx_Calc_Plot_Pixel   # e2 below dx, skip to next calc
+    jbe     E2_Dx_Calc_Plot_Pixel   # e2 < dx, skip to next calc
     movw    err(%bp), %ax       # err into ax
-    addw    dvaly(%bp), %ax     # err = err-dy (dy was made negative), err is target
+    addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err is target
     movw    %ax, err(%bp)       # result in ax into err
     movw    x0(%bp), %ax        # x0 into ax
-    addw    stepx(%bp), %ax     # xo = x0 +sx, x0 is target
+    addw   stepx(%bp), %ax      # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 E2_Dx_Calc_Plot_Pixel:
     movw    e2(%bp), %ax        # bring out e2 into Ax
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
     cmp     e2(%bp), %dx        # e2 < dx we continue, e2 is target
-    jae     Plot_Pixel          # e3 above, skip to loop
+    jae     Plot_Pixel          # e2 > dx, skip to loop
 
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
-    addw    dvalx(%bp), %ax     # err = err+dx, err is target
+    addw   dvalx(%bp), %ax      # err = err+dx, err is target
     movw    %ax, err(%bp)       # ax into err
     movw    y0(%bp), %ax        # y0 into ax
-    addw    stepy(%bp), %ax     # xo = y0 +sy, y0 in ax is target
+    addw   stepy(%bp), %ax      # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
     jmp Plot_Pixel              # after calcs we loop
