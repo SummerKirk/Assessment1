@@ -123,7 +123,7 @@ Draw_Line:
     movw    %bx, x1(%bp)        # x1 from ch
     movw    %ax, x0(%bp)        # xo from cl
 
-# absoloute x
+# absoloute delta x, calculate and absoloute
     movw    x1(%bp), %ax        # x1 into ax
     movw    x0(%bp), %dx
     subw    %dx, %ax            # xend-xstart, x1 is target
@@ -258,6 +258,13 @@ real_start:
     movw    $34, %bx            # x1
     movw    $44, %cx            # y0
     movw    $54, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $10, %si            # colour
+    movw    $64, %ax            # x0
+    movw    $27, %bx            # x1
+    movw    $104,%cx            # y0
+    movw    $15, %dx            # y1
     call    Draw_Line           # draw a line
 
 
