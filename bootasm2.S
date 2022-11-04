@@ -179,12 +179,12 @@ Plot_Pixel:
     movb    col(%bp), %al       # colour into al
     movw    x0(%bp), %cx        # x coord into cx
     movw    y0(%bp), %dx        # y coord into dx
-    int     $0x10               # draw the pixel via interupt
+    # COMMENT OUT int     $0x10               # draw the pixel via interupt
 
-    # COMMENT OUT pushw %cx   # check x
-    # COMMENT OUT pushw $10
-    # COMMENT OUT call cons_write_number
-    # COMMENT OUT call cons_write_crlf
+    pushw %cx   # check x
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
 
     # COMMENT OUT pushw %dx   # check y
     # COMMENT OUT pushw $10
@@ -242,6 +242,7 @@ E2_Dx_Calc_Plot_Pixel:
     jmp Plot_Pixel              # after calcs we loop
 
 End_Of_Draw_Line:
+    movw %bp, %sp
     popw %bp
 
     # COMMENT OUT movw    $10, %si            # colour
@@ -260,7 +261,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    call swap_to_VGA         # change to VGA mode
+    # COMMENT OUT call swap_to_VGA         # change to VGA mode
 
     movw    $5,  %si            # colour
     movw    $24, %ax            # x0
@@ -268,6 +269,11 @@ real_start:
     movw    $44, %cx            # y0
     movw    $54, %dx            # y1
     call    Draw_Line           # draw a line
+
+    pushw $1111
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
 
     movw    $10, %si            # colour
     movw    $64, %ax            # x0
