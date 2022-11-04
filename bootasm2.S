@@ -117,11 +117,11 @@ Draw_Line:
     pushw   %bp                 # primary stackprep done so i can store local variables
     movw    %sp, %bp
     subw    $22, %sp            # reserve space for local variables
-    movb    %al, col(%bp)       # values into stack, bp is target, colour from al
-    movb    %dh, y1(%bp)        # y1 from dh
-    movb    %dl, y0(%bp)        # y0 from dl
-    movb    %ch, x1(%bp)        # x1 from ch
-    movb    %cl, x0(%bp)        # xo from cl
+    movw    %si, col(%bp)       # values into stack, bp is target, colour from al
+    movw    %dx, y1(%bp)        # y1 from dh
+    movw    %cx, y0(%bp)        # y0 from dl
+    movw    %bx, x1(%bp)        # x1 from ch
+    movw    %ax, x0(%bp)        # xo from cl
 
     movw    x1(%bp), %ax        # x1 into ax
     movw    x0(%bp), %dx
@@ -252,19 +252,13 @@ real_start:
 
     # COMMENT OUT call    swap_to_VGA         # change to VGA mode
 
-    movb    $5, %al             # colour
-    movb    $24, %cl            # x0
-    movb    $34, %ch            # x1
-    movb    $44, %dl            # y0
-    movb    $54, %dh            # y1
+    movw    $5,  %si            # colour
+    movw    $24, %ax            # x0
+    movw    $34, %bx            # x1
+    movw    $44, %cx            # y0
+    movw    $54, %dx            # y1
     call    Draw_Line           # draw a line
 
-    movb    $10, %al
-    movb    $39, %cl 
-    movb    $29, %ch 
-    movb    $59, %dl 
-    movb    $39, %dh 
-    # COMMENT OUT call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
