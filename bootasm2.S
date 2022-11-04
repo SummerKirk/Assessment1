@@ -108,7 +108,8 @@ StepY_Comp:
 
 Err_Comp:
     movw    dvalx(%bp), %ax     # bring dvalx into ax
-    subw    dvaly(%bp), %ax     # err = dx - dy, dvalx is target
+    movw    dvaly(%bp), %dx
+    subw    %dx, %ax            # err = dx - dy, dvalx is target
     movw    %ax, err(%bp)       # result in ax goes into err
 
     movw    dvaly(%bp), %ax     # bring dy into ax
@@ -143,11 +144,14 @@ Re_Calc_Plot_Pixel:
     cmp     e2(%bp), %dx        # e2 > -dy we continue the calculations, dx is target
     jge     E2_Dx_Calc_Plot_Pixel   # when target is more than e2, skip to x calc
     movw    err(%bp), %ax       # err into ax
-    addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err in ax is target
+    movw    dvaly(%bp), %dx
+    addw    %dx, %ax            # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err, err is target
 
     movw    x0(%bp), %ax        # x0 into ax
-    addw   stepx(%bp), %ax      # xo = x0 +sx, x0 is target
+    movw    stepx(%bp), %dx
+    addw    $1, %ax
+    # COMMENT OUT addw    %dx, %ax            # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 
 E2_Dx_Calc_Plot_Pixel:
@@ -161,7 +165,9 @@ E2_Dx_Calc_Plot_Pixel:
     movw    %ax, err(%bp)       # ax into err
 
     movw    y0(%bp), %ax        # y0 into ax
-    addw    stepy(%bp), %ax     # xo = y0 +sy, y0 in ax is target
+    movw    stepy(%bp), %dx
+    addw    $1, %ax
+    # COMMENT OUT addw    %dx, %ax        # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
     jmp Plot_Pixel              # after calcs we loop
@@ -189,7 +195,7 @@ real_start:
     movb    $29, %ch 
     movb    $59, %dl 
     movb    $39, %dh 
-    call    Draw_Line           # draw a line
+    # COMMENT OUT call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
