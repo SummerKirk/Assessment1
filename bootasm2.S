@@ -277,17 +277,24 @@ real_start:
     call    Draw_Line           # draw a line
 
     movw    $4 , %si            # colour
-    movw    $95, %ax            # x0
-    movw    $47, %bx            # x1
-    movw    $204,%cx            # y0
+    movw    $5, %ax             # x0
+    movw    $207, %bx            # x1
+    movw    $224,%cx            # y0
     movw    $115, %dx           # y1
     call    Draw_Line           # draw a line
 
-    movw    $5,  %si            # colour
+    movw    $7,  %si            # colour
     movw    $24, %ax            # x0
     movw    $94, %bx            # x1
     movw    $14, %cx            # y0
     movw    $254, %dx           # y1
+    call    Draw_Line           # draw a line
+
+    movw    $6,  %si            # colour
+    movw    $14, %ax            # x0
+    movw    $24, %bx            # x1
+    movw    $34, %cx            # y0
+    movw    $44, %dx            # y1
     call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
