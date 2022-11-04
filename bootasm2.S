@@ -270,10 +270,10 @@ real_start:
     # COMMENT OUT call cons_write_crlf
 
     movw    $10, %si            # colour
-    movw    $64, %ax            # x0
-    movw    $27, %bx            # x1
-    movw    $104,%cx            # y0
-    movw    $15, %dx            # y1
+    movw    $5, %ax            # x0
+    movw    $5, %bx            # x1
+    movw    $90,%cx            # y0
+    movw    $115, %dx            # y1
     call    Draw_Line           # draw a line
 
     pushw $1111
@@ -282,12 +282,12 @@ real_start:
     call cons_write_crlf
 
     movw    $4 , %si            # colour red line
-    movw    $5, %ax             # x0
-    movw    $207, %bx            # x1
-    movw    $224,%cx            # y0
-    movw    $115, %dx           # y1
+    movw    $15, %ax             # x0
+    movw    $115, %bx            # x1
+    movw    $90,%cx            # y0
+    movw    $90, %dx           # y1
     call    Draw_Line           # draw a line
-
+#
     pushw $2222
     pushw $10
     call cons_write_number
