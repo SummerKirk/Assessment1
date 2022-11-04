@@ -122,7 +122,8 @@ Draw_Line:
     movw    %cx, y0(%bp)        # y0 from dl
     movw    %bx, x1(%bp)        # x1 from ch
     movw    %ax, x0(%bp)        # xo from cl
-
+    
+# absoloute x
     movw    x1(%bp), %ax        # x1 into ax
     movw    x0(%bp), %dx
     subw    %dx, %ax            # xend-xstart, x1 is target
@@ -178,17 +179,17 @@ Plot_Pixel:
     movb    col(%bp), %al       # colour into al
     movw    x0(%bp), %cx        # x coord into cx
     movw    y0(%bp), %dx        # y coord into dx
-    # COMMENT OUT int     $0x10               # draw the pixel via interupt
+    int     $0x10               # draw the pixel via interupt
 
-    pushw %cx   # check x
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
+    # COMMENT OUT pushw %cx   # check x
+    # COMMENT OUT pushw $10
+    # COMMENT OUT call cons_write_number
+    # COMMENT OUT call cons_write_crlf
 
-    pushw %dx   # check y
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
+    # COMMENT OUT pushw %dx   # check y
+    # COMMENT OUT pushw $10
+    # COMMENT OUT call cons_write_number
+    # COMMENT OUT call cons_write_crlf
 
 # see if we are at the end of the line
     movw    x1(%bp), %dx        # x end into dx
@@ -250,7 +251,7 @@ real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    # COMMENT OUT call    swap_to_VGA         # change to VGA mode
+    call swap_to_VGA         # change to VGA mode
 
     movw    $5,  %si            # colour
     movw    $24, %ax            # x0
