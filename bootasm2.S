@@ -243,8 +243,17 @@ E2_Dx_Calc_Plot_Pixel:
 
 End_Of_Draw_Line:
     popw %bp
+
+    # COMMENT OUT movw    $10, %si            # colour
+    # COMMENT OUT movw    $64, %ax            # x0
+    # COMMENT OUT movw    $27, %bx            # x1
+    # COMMENT OUT movw    $104,%cx            # y0
+    # COMMENT OUT movw    $15, %dx            # y1
+    # COMMENT OUT call    Draw_Line           # draw a line
+
     ret $22                     # return, removing the 11 local variables from the stack
-    ret
+# COMMENT OUT    ret # double ret?
+
 # COMMENT END OF DRAW SINGLE LINE
 
 real_start:
@@ -267,6 +276,19 @@ real_start:
     movw    $15, %dx            # y1
     call    Draw_Line           # draw a line
 
+    movw    $4 , %si            # colour
+    movw    $95, %ax            # x0
+    movw    $47, %bx            # x1
+    movw    $204,%cx            # y0
+    movw    $115, %dx           # y1
+    call    Draw_Line           # draw a line
+
+    movw    $5,  %si            # colour
+    movw    $24, %ax            # x0
+    movw    $94, %bx            # x1
+    movw    $14, %cx            # y0
+    movw    $254, %dx            # y1
+    call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
     jmp     endless_loop    
