@@ -126,6 +126,7 @@ Plot_Pixel:
     movw    y0(%bp), %dx        # y coord into dx
     int     $0x10               # draw the pixel via interupt
 
+# see if we are at the end of the line
     movw    x1(%bp), %dx        # x end into dx
     cmp     x0(%bp), %dx        # x0 = x1 (if they're equal, at end of x) dx is target
     jne     Re_Calc_Plot_Pixel  # when target is not eaual to dx, go to the calcs
@@ -135,19 +136,22 @@ Plot_Pixel:
     jmp     End_Of_Draw_Line    # both are equal so they fell through, exit loop
 
 Re_Calc_Plot_Pixel:
+# e2 calc
     movw    err(%bp), %ax       # err into ax
     movw    $2, %dx             # 2 into dx
     imulw   %dx                 # e2 = 2err
     movw    %ax, e2(%bp)        # result in ax into e2
 
+# e2 dy check and err re calc
     movw    dvaly(%bp), %dx     # dy into dxreg, dval (delta value y) is -dy
     cmp     e2(%bp), %dx        # e2 > -dy we continue the calculations, dx is target
     jge     E2_Dx_Calc_Plot_Pixel   # when target is more than e2, skip to x calc
     movw    err(%bp), %ax       # err into ax
+# err recalc
     movw    dvaly(%bp), %dx
     addw    %dx, %ax            # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err, err is target
-
+# x0 recalc
     movw    x0(%bp), %ax        # x0 into ax
     movw    stepx(%bp), %dx
     addw    $1, %ax
@@ -155,15 +159,15 @@ Re_Calc_Plot_Pixel:
     movw    %ax, x0(%bp)        # save ax into x0
 
 E2_Dx_Calc_Plot_Pixel:
-    # COMMENTED OUT movw    e2(%bp), %ax        # bring out e2 into Ax [why am i doing this bit]
+# e2 dx check and err re calc
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
     cmp     e2(%bp), %dx        # when e2 < dx we continue the calculations, dx is target
     jl      Plot_Pixel          # when target is less than e2, skip to loop, operand e2 > target
-
+# err recalc
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
     addw    dvalx(%bp), %ax     # err = err+dx, err is target
     movw    %ax, err(%bp)       # ax into err
-
+# y0 recalc
     movw    y0(%bp), %ax        # y0 into ax
     movw    stepy(%bp), %dx
     addw    $1, %ax
