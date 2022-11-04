@@ -122,7 +122,7 @@ Draw_Line:
     movw    %cx, y0(%bp)        # y0 from dl
     movw    %bx, x1(%bp)        # x1 from ch
     movw    %ax, x0(%bp)        # xo from cl
-    
+
 # absoloute x
     movw    x1(%bp), %ax        # x1 into ax
     movw    x0(%bp), %dx
@@ -219,8 +219,8 @@ Re_Calc_Plot_Pixel:
 # x0 recalc
     movw    x0(%bp), %ax        # x0 into ax
     movw    stepx(%bp), %dx
-    addw    $1, %ax
-    # COMMENT OUT addw    %dx, %ax            # xo = x0 +sx, x0 is target
+    # COMMENT OUT addw    $1, %ax
+    addw    %dx, %ax            # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 
 E2_Dx_Calc_Plot_Pixel:
@@ -235,8 +235,8 @@ E2_Dx_Calc_Plot_Pixel:
 # y0 recalc
     movw    y0(%bp), %ax        # y0 into ax
     movw    stepy(%bp), %dx
-    addw    $1, %ax
-    # COMMENT OUT addw    %dx, %ax        # xo = y0 +sy, y0 in ax is target
+    # COMMENT OUT addw    $1, %ax
+    addw    %dx, %ax        # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
     jmp Plot_Pixel              # after calcs we loop
