@@ -72,17 +72,18 @@ Draw_Line:
     movw    x1(%bp), %ax        # x1 into ax
     subw    x0(%bp), %ax        # xend-xstart, x1 is target
     cmp     $0, %ax             # compare to 0 ax is target
-    jae     Absoloute_Y         # when target is greater than 0, it's already positive
+    jge     Absoloute_Y         # when target is greater than 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a register
     imul    %dx                 # when it's less than 0, make it positive
     
 Absoloute_Y:
     movw    %ax, dvalx(%bp)     # dvalx into bp, bp is target
+# example of jump then set the result
 
     movw    y1(%bp), %ax        # y1 into ax
     sub     y0(%bp), %ax        # yend - ystart, y1 is target
     cmp     $0, %ax             # compare to 0 > ax is target
-    jae      StepX_Comp         # when target is greater than 0, it's already positive
+    jge      StepX_Comp         # when target is greater than 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a reg
     imul    %dx                 # when it's less than 0, make it positive
 
@@ -92,14 +93,15 @@ StepX_Comp:
     movw    x1(%bp), %dx        # x1 into dx, will be target
     cmp     %dx, x0(%bp)        # x1 > x0 , x0 is target
     movw    $1 , stepx(%bp)     # will set pos before jump, will fall through and alter if negative
-    jb      StepY_Comp          # when target is less than the end point, step should remain +1
+    jl      StepY_Comp          # when target is less than the end point, step should remain +1
     movw    $-1, stepx(%bp)     # stepx changed to -1, bp is target
+# example of set result, possibly jump, then re-calc and set again if no jump
 
 StepY_Comp:
     movw    y1(%bp), %dx        # y1 into dx, will be target
     cmp     %dx, y0(%bp)        # y1 > y0 figure out if y step is positive or negative y0 is target
     movw    $1, stepy(%bp)      # will set pos before jump, will fall through and alter if negative
-    jb      Err_Comp            # when target is less than the end point, step should remain +1
+    jl      Err_Comp            # when target is less than the end point, step should remain +1
     movw    $-1, stepy(%bp)     # step y to -1
 
 Err_Comp:
@@ -123,11 +125,11 @@ Plot_Pixel:
 
     movw    x1(%bp), %dx        # x end into dx
     cmp     x0(%bp), %dx        # x0 = x1 (if they're equal, at end of x) dx is target
-    jne     Re_Calc_Plot_Pixel  # not? continue
+    jne     Re_Calc_Plot_Pixel  # when target is not eaual to dx, go to the calcs
     movw    y1(%bp), %dx        # y end into dx
     cmp     y0(%bp), %dx        # y0 = y1 (if they're equal, at end of y) dx is target
-    jne     Re_Calc_Plot_Pixel  # not? continue
-    jmp     End_Of_Draw_Line    # both are at ends? exit loop
+    jne     Re_Calc_Plot_Pixel  # when target is not equal to dx, go to the calcs
+    jmp     End_Of_Draw_Line    # both are equal so they fell through, exit loop
 
 Re_Calc_Plot_Pixel:
     movw    err(%bp), %ax       # err into ax
@@ -137,7 +139,7 @@ Re_Calc_Plot_Pixel:
 
     movw    dvaly(%bp), %dx     # dy into dxreg, dval (delta value y) is -dy
     cmp     e2(%bp), %dx        # e2 > -dy we continue the calculations, dx is target
-    jge     E2_Dx_Calc_Plot_Pixel   # when -dy is less than e2 do the calc, jump over when -dy is more than e2
+    jge     E2_Dx_Calc_Plot_Pixel   # when target is more than e2, skip to x calc
     movw    err(%bp), %ax       # err into ax
     addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err
@@ -148,7 +150,7 @@ E2_Dx_Calc_Plot_Pixel:
     # COMMENTED OUT movw    e2(%bp), %ax        # bring out e2 into Ax [why am i doing this bit]
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
     cmp     e2(%bp), %dx        # when e2 < dx we continue the calculations, dx is target
-    jb      Plot_Pixel          # when dx is less than e2, skip to loop, operand e2 > target
+    jl      Plot_Pixel          # when target is less than e2, skip to loop, operand e2 > target
 
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
     addw    dvalx(%bp), %ax     # err = err+dx, err is target
