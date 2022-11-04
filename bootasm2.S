@@ -276,12 +276,22 @@ real_start:
     movw    $15, %dx            # y1
     call    Draw_Line           # draw a line
 
-    movw    $4 , %si            # colour
+    pushw $1111
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
+
+    movw    $4 , %si            # colour red line
     movw    $5, %ax             # x0
     movw    $207, %bx            # x1
     movw    $224,%cx            # y0
     movw    $115, %dx           # y1
     call    Draw_Line           # draw a line
+
+    pushw $2222
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
 
     movw    $7,  %si            # colour
     movw    $24, %ax            # x0
@@ -289,6 +299,11 @@ real_start:
     movw    $14, %cx            # y0
     movw    $254, %dx           # y1
     call    Draw_Line           # draw a line
+
+    pushw $3333
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
 
     movw    $6,  %si            # colour
     movw    $14, %ax            # x0
