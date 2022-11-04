@@ -142,10 +142,12 @@ Re_Calc_Plot_Pixel:
     jge     E2_Dx_Calc_Plot_Pixel   # when target is more than e2, skip to x calc
     movw    err(%bp), %ax       # err into ax
     addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err in ax is target
-    movw    %ax, err(%bp)       # result in ax into err
+    movw    %ax, err(%bp)       # result in ax into err, err is target
+
     movw    x0(%bp), %ax        # x0 into ax
     addw   stepx(%bp), %ax      # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
+
 E2_Dx_Calc_Plot_Pixel:
     # COMMENTED OUT movw    e2(%bp), %ax        # bring out e2 into Ax [why am i doing this bit]
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
@@ -155,6 +157,7 @@ E2_Dx_Calc_Plot_Pixel:
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
     addw    dvalx(%bp), %ax     # err = err+dx, err is target
     movw    %ax, err(%bp)       # ax into err
+
     movw    y0(%bp), %ax        # y0 into ax
     addw    stepy(%bp), %ax     # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
@@ -171,11 +174,18 @@ real_start:
 
     call    swap_to_VGA         # change to VGA mode
 
-    movb    $5, %al
-    movb    $24, %cl 
-    movb    $34, %ch 
-    movb    $44, %dl 
-    movb    $54, %dh 
+    movb    $5, %al             # colour
+    movb    $24, %cl            # x0
+    movb    $34, %ch            # x1
+    movb    $44, %dl            # y0
+    movb    $54, %dh            # y1
+    call    Draw_Line           # draw a line
+
+    movb    $10, %al
+    movb    $39, %cl 
+    movb    $29, %ch 
+    movb    $59, %dl 
+    movb    $39, %dh 
     call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
