@@ -179,12 +179,12 @@ Plot_Pixel:
     movb    col(%bp), %al       # colour into al
     movw    x0(%bp), %cx        # x coord into cx
     movw    y0(%bp), %dx        # y coord into dx
-    # COMMENT OUT int     $0x10               # draw the pixel via interupt
+    int     $0x10               # draw the pixel via interupt
 
-    pushw %cx   # check x
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
+    # COMMENT OUT pushw %cx   # check x
+    # COMMENT OUT pushw $10
+    # COMMENT OUT call cons_write_number
+    # COMMENT OUT call cons_write_crlf
 
     # COMMENT OUT pushw %dx   # check y
     # COMMENT OUT pushw $10
@@ -219,7 +219,6 @@ Re_Calc_Plot_Pixel:
 # x0 recalc
     movw    x0(%bp), %ax        # x0 into ax
     movw    stepx(%bp), %dx
-    # COMMENT OUT addw    $1, %ax
     addw    %dx, %ax            # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 
@@ -235,7 +234,6 @@ E2_Dx_Calc_Plot_Pixel:
 # y0 recalc
     movw    y0(%bp), %ax        # y0 into ax
     movw    stepy(%bp), %dx
-    # COMMENT OUT addw    $1, %ax
     addw    %dx, %ax        # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
@@ -244,24 +242,20 @@ E2_Dx_Calc_Plot_Pixel:
 End_Of_Draw_Line:
     movw %bp, %sp
     popw %bp
-
     # COMMENT OUT movw    $10, %si            # colour
     # COMMENT OUT movw    $64, %ax            # x0
     # COMMENT OUT movw    $27, %bx            # x1
     # COMMENT OUT movw    $104,%cx            # y0
     # COMMENT OUT movw    $15, %dx            # y1
-    # COMMENT OUT call    Draw_Line           # draw a line
-
+    # COMMENT OUT call    Draw_Line           # draw a line WRONG CALL SPOT TEST
     ret $22                     # return, removing the 11 local variables from the stack
-# COMMENT OUT    ret # double ret?
-
 # COMMENT END OF DRAW SINGLE LINE
 
 real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    # COMMENT OUT call swap_to_VGA         # change to VGA mode
+    call swap_to_VGA            # change to VGA mode
 
     movw    $5,  %si            # colour
     movw    $24, %ax            # x0
@@ -270,10 +264,10 @@ real_start:
     movw    $54, %dx            # y1
     call    Draw_Line           # draw a line
 
-    pushw $1111
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
+    # COMMENT OUT pushw $1111
+    # COMMENT OUT pushw $10
+    # COMMENT OUT call cons_write_number
+    # COMMENT OUT call cons_write_crlf
 
     movw    $10, %si            # colour
     movw    $64, %ax            # x0
@@ -293,7 +287,7 @@ real_start:
     movw    $24, %ax            # x0
     movw    $94, %bx            # x1
     movw    $14, %cx            # y0
-    movw    $254, %dx            # y1
+    movw    $254, %dx           # y1
     call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
