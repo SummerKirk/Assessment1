@@ -60,9 +60,9 @@ swap_to_VGA:
 #define col   -2
 
 Draw_Line:
-    pushw   %bp
+    pushw   %bp                 # primary stackprep done so i can store local variables
     movw    %sp, %bp
-    subw    $4, %sp             # primary stackprep done so i can store local variables
+    subw    $22, %sp            # reserve space for local variables
     movb    %al, col(%bp)       # values into stack, bp is target, colour from al
     movb    %dh, y1(%bp)        # y1 from dh
     movb    %dl, y0(%bp)        # y0 from dl
@@ -70,7 +70,8 @@ Draw_Line:
     movb    %cl, x0(%bp)        # xo from cl
 
     movw    x1(%bp), %ax        # x1 into ax
-    subw    x0(%bp), %ax        # xend-xstart, x1 is target
+    movw    x0(%bp), %dx
+    subw    %dx, %ax            # xend-xstart, x1 is target
     cmp     $0, %ax             # compare to 0 ax is target
     jge     Absoloute_Y         # when target is greater than 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a register
@@ -81,7 +82,8 @@ Absoloute_Y:
 # example of jump then set the result
 
     movw    y1(%bp), %ax        # y1 into ax
-    sub     y0(%bp), %ax        # yend - ystart, y1 is target
+    movw    y0(%bp), %dx
+    sub     %dx, %ax            # yend - ystart, y1 is target
     cmp     $0, %ax             # compare to 0 > ax is target
     jge      StepX_Comp         # when target is greater than 0, it's already positive
     movw    $-1, %dx            # -1 into dx as multiply takes a reg
@@ -165,7 +167,8 @@ E2_Dx_Calc_Plot_Pixel:
     jmp Plot_Pixel              # after calcs we loop
 
 End_Of_Draw_Line:
-    ret
+    popw %bp
+    ret $22                     # return, removing the 11 local variables from the stack
 # COMMENT END OF DRAW SINGLE LINE
 
 real_start:
