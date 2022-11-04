@@ -287,7 +287,7 @@ real_start:
     movw    $90,%cx            # y0
     movw    $90, %dx           # y1
     call    Draw_Line           # draw a line
-#
+# it's halting here
     pushw $2222
     pushw $10
     call cons_write_number
