@@ -63,11 +63,11 @@ Draw_Line:
     pushw   %bp
     movw    %sp, %bp
     subw    $4, %sp             # primary stackprep done so i can store local variables
-    movb    %al, col(%bp)       # values into stack, bp is target
-    movb    %dh, y1(%bp)
-    movb    %dl, y0(%bp)
-    movb    %ch, x1(%bp)
-    movb    %cl, x0(%bp)        # COMMENT put values on stack so i can use the int function
+    movb    %al, col(%bp)       # values into stack, bp is target, colour from al
+    movb    %dh, y1(%bp)        # y1 from dh
+    movb    %dl, y0(%bp)        # y0 from dl
+    movb    %ch, x1(%bp)        # x1 from ch
+    movb    %cl, x0(%bp)        # xo from cl
 
     movw    x1(%bp), %ax        # x1 into ax
     subw    x0(%bp), %ax        # xend-xstart, x1 is target
@@ -122,10 +122,10 @@ Plot_Pixel:
     int     $0x10               # draw the pixel via interupt
 
     movw    x1(%bp), %dx        # x end into dx
-    cmp     x0(%bp), %dx        # x0 = x1 (if they're equal, at end of x)
+    cmp     x0(%bp), %dx        # x0 = x1 (if they're equal, at end of x) dx is target
     jne     Re_Calc_Plot_Pixel  # not? continue
     movw    y1(%bp), %dx        # y end into dx
-    cmp     y0(%bp), %dx        # y0 = y1 (if they're equal, at end of y)
+    cmp     y0(%bp), %dx        # y0 = y1 (if they're equal, at end of y) dx is target
     jne     Re_Calc_Plot_Pixel  # not? continue
     jmp     End_Of_Draw_Line    # both are at ends? exit loop
 
@@ -135,26 +135,26 @@ Re_Calc_Plot_Pixel:
     imulw   %dx                 # e2 = 2err
     movw    %ax, e2(%bp)        # result in ax into e2
 
-    movw    dvaly(%bp), %dx     # dy into dxreg, dy is -dy
-    cmp     e2(%bp), %dx        # e2 > -dy we continue, dx is target
-    jbe     E2_Dx_Calc_Plot_Pixel   # e2 < dx, skip to next calc
+    movw    dvaly(%bp), %dx     # dy into dxreg, dval (delta value y) is -dy
+    cmp     e2(%bp), %dx        # e2 > -dy we continue the calculations, dx is target
+    jge     E2_Dx_Calc_Plot_Pixel   # when -dy is less than e2 do the calc, jump over when -dy is more than e2
     movw    err(%bp), %ax       # err into ax
-    addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err is target
+    addw   dvaly(%bp), %ax      # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err
     movw    x0(%bp), %ax        # x0 into ax
     addw   stepx(%bp), %ax      # xo = x0 +sx, x0 is target
     movw    %ax, x0(%bp)        # save ax into x0
 E2_Dx_Calc_Plot_Pixel:
-    movw    e2(%bp), %ax        # bring out e2 into Ax
+    movw    e2(%bp), %ax        # bring out e2 into Ax [why am i doing this bit]
     movw    dvalx(%bp), %dx     # bring dx into Dx reg
-    cmp     e2(%bp), %dx        # e2 < dx, dx is target, skip if e2 is more than dx
-    jae     Plot_Pixel          # e2 > dx, skip to loop
+    cmp     e2(%bp), %dx        # when e2 < dx we continue the calculations, dx is target
+    jb      Plot_Pixel          # when dx is less than e2, skip to loop, operand e2 > target
 
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
-    addw   dvalx(%bp), %ax      # err = err+dx, err is target
+    addw    dvalx(%bp), %ax     # err = err+dx, err is target
     movw    %ax, err(%bp)       # ax into err
     movw    y0(%bp), %ax        # y0 into ax
-    addw   stepy(%bp), %ax      # xo = y0 +sy, y0 in ax is target
+    addw    stepy(%bp), %ax     # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
     jmp Plot_Pixel              # after calcs we loop
