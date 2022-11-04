@@ -38,6 +38,60 @@ cons_writeline:
     call    cons_write_crlf
     ret    
 
+# number write
+HexChars:	.ascii "0123456789ABCDEF"
+
+# Output the value passed on the stack to the screen using the specified base
+#
+
+#define     number      6
+#define     base        4
+
+#define     endofstring -2
+
+cons_write_number:
+    pushw   %bp                     # Save existing frame pointer
+    movw    %sp, %bp                # Setup our frame pointer
+    subw    $18, %sp                # Reserve space for our string buffer
+    pushw   %ax                     # Save the registers we will trash
+    pushw   %bx
+    pushw   %cx
+    pushw   %dx
+    pushw   %si
+    pushw   %di
+
+    movw    %bp, %si
+    subw    $3, %si
+    movb    $0, endofstring(%bp)    # Insert end of string indicator (0)    
+    movw    number(%bp), %ax
+	
+getdigit:
+	xor		%dx, %dx                # Divide number by base
+	movw	base(%bp), %cx
+	div		%cx
+    movw    %dx, %di                # Convert remainder to hex character
+    movb    HexChars(%di), %dl      # and stpre in buffer
+	movb	%dl, (%si)
+	dec		%si
+	cmpw	$0, %ax                 # Have we extracted all digits?
+	jne		getdigit
+	inc		%si
+	call	cons_write              # Output the string
+
+    popw    %di                     # Restore the registers
+    popw    %si
+    popw    %dx
+    popw    %cx
+    popw    %bx
+    popw    %ax
+    movw    %bp, %sp                # Delete the local variables
+    popw    %bp
+    ret     $4                      # Return, removing paramters from stack
+	ret
+	
+IntBuffer:   .string "     "
+# end of num write for debug
+
 # COMMENT SWAP TO VIDEO MODE
 swap_to_VGA:
     movb    $0, %ah             # ensure ah is 0 for the interupt
@@ -124,7 +178,17 @@ Plot_Pixel:
     movb    col(%bp), %al       # colour into al
     movw    x0(%bp), %cx        # x coord into cx
     movw    y0(%bp), %dx        # y coord into dx
-    int     $0x10               # draw the pixel via interupt
+    # COMMENT OUT int     $0x10               # draw the pixel via interupt
+
+    pushw %cx   # check x
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
+
+    pushw %dx   # check y
+    pushw $10
+    call cons_write_number
+    call cons_write_crlf
 
 # see if we are at the end of the line
     movw    x1(%bp), %dx        # x end into dx
@@ -179,13 +243,14 @@ E2_Dx_Calc_Plot_Pixel:
 End_Of_Draw_Line:
     popw %bp
     ret $22                     # return, removing the 11 local variables from the stack
+    ret
 # COMMENT END OF DRAW SINGLE LINE
 
 real_start:
     movw    $boot_message, %si  # Display our boot message
     call    cons_writeline
 
-    call    swap_to_VGA         # change to VGA mode
+    # COMMENT OUT call    swap_to_VGA         # change to VGA mode
 
     movb    $5, %al             # colour
     movb    $24, %cl            # x0
