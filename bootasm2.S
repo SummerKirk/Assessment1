@@ -216,7 +216,7 @@ Re_Calc_Plot_Pixel:
     movw    dvaly(%bp), %dx
     addw    %dx, %ax            # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err, err is target
-# x0 recalc
+# x0 recalc with x step
     movw    x0(%bp), %ax        # x0 into ax
     movw    stepx(%bp), %dx
     addw    %dx, %ax            # xo = x0 +sx, x0 is target
@@ -231,17 +231,17 @@ E2_Dx_Calc_Plot_Pixel:
     movw    err(%bp), %ax       # err+ dvalx, err into ax, ax is target
     addw    dvalx(%bp), %ax     # err = err+dx, err is target
     movw    %ax, err(%bp)       # ax into err
-# y0 recalc
+# y0 recalc with y step
     movw    y0(%bp), %ax        # y0 into ax
     movw    stepy(%bp), %dx
-    addw    %dx, %ax        # xo = y0 +sy, y0 in ax is target
+    addw    %dx, %ax            # xo = y0 +sy, y0 in ax is target
     movw    %ax, y0(%bp)        # result in ax into y0
      
     jmp Plot_Pixel              # after calcs we loop
 
 End_Of_Draw_Line:
-    movw %bp, %sp
-    popw %bp
+    movw %bp, %sp               # brings the proper bp back onto the stack
+    popw %bp                    # brings the bp back to normal, removes local variables
     # COMMENT OUT movw    $10, %si            # colour
     # COMMENT OUT movw    $64, %ax            # x0
     # COMMENT OUT movw    $27, %bx            # x1
