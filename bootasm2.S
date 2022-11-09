@@ -248,7 +248,7 @@ End_Of_Draw_Line:
     # COMMENT OUT movw    $104,%cx            # y0
     # COMMENT OUT movw    $15, %dx            # y1
     # COMMENT OUT call    Draw_Line           # draw a line WRONG CALL SPOT TEST
-    ret $22                     # return, removing the 11 local variables from the stack
+    ret                     # return, numbers remove parameters. not local vars
 # COMMENT END OF DRAW SINGLE LINE
 
 real_start:
@@ -287,7 +287,7 @@ real_start:
     movw    $90,%cx            # y0
     movw    $90, %dx           # y1
     call    Draw_Line           # draw a line
-# it's halting here
+
     pushw $2222
     pushw $10
     call cons_write_number
@@ -306,7 +306,7 @@ real_start:
     call cons_write_crlf
 
     movw    $6,  %si            # colour
-    movw    $14, %ax            # x0
+    movw    $24, %ax            # x0
     movw    $24, %bx            # x1
     movw    $34, %cx            # y0
     movw    $44, %dx            # y1
