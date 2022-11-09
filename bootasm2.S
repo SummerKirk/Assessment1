@@ -257,7 +257,7 @@ real_start:
 
     call swap_to_VGA            # change to VGA mode
 
-    movw    $5,  %si            # colour
+    movw    $5,  %si            # colour magenta
     movw    $24, %ax            # x0
     movw    $34, %bx            # x1
     movw    $44, %cx            # y0
@@ -269,47 +269,67 @@ real_start:
     # COMMENT OUT call cons_write_number
     # COMMENT OUT call cons_write_crlf
 
-    movw    $10, %si            # colour
-    movw    $5, %ax            # x0
-    movw    $5, %bx            # x1
-    movw    $90,%cx            # y0
-    movw    $115, %dx            # y1
+    movw    $10, %si            # colour l green
+    movw    $5, %ax             # x0
+    movw    $5, %bx             # x1
+    movw    $90,%cx             # y0
+    movw    $115, %dx           # y1
     call    Draw_Line           # draw a line
-
-    pushw $1111
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
 
     movw    $4 , %si            # colour red line
-    movw    $15, %ax             # x0
-    movw    $115, %bx            # x1
-    movw    $90,%cx            # y0
-    movw    $90, %dx           # y1
+    movw    $15, %ax            # x0
+    movw    $115, %bx           # x1
+    movw    $90,%cx             # y0
+    movw    $90, %dx            # y1
     call    Draw_Line           # draw a line
 
-    pushw $2222
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
-
-    movw    $7,  %si            # colour
+    movw    $7,  %si            # colour grey
     movw    $24, %ax            # x0
     movw    $94, %bx            # x1
     movw    $14, %cx            # y0
     movw    $254, %dx           # y1
     call    Draw_Line           # draw a line
 
-    pushw $3333
-    pushw $10
-    call cons_write_number
-    call cons_write_crlf
-
-    movw    $6,  %si            # colour
+    movw    $6,  %si            # colour orange
     movw    $24, %ax            # x0
     movw    $24, %bx            # x1
     movw    $34, %cx            # y0
     movw    $44, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $14,  %si           # colour yellow
+    movw    $100, %ax           # x0
+    movw    $84, %bx            # x1
+    movw    $95, %cx            # y0
+    movw    $48, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $2,  %si            # colour green
+    movw    $100, %ax           # x0
+    movw    $84, %bx            # x1
+    movw    $50, %cx            # y0
+    movw    $79, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $6,  %si            # colour brown
+    movw    $70, %ax            # x0
+    movw    $150, %bx           # x1
+    movw    $95, %cx            # y0
+    movw    $48, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $12,  %si           # colour l red
+    movw    $100, %ax           # x0
+    movw    $94, %bx            # x1
+    movw    $75, %cx            # y0
+    movw    $48, %dx            # y1
+    call    Draw_Line           # draw a line
+
+    movw    $15,  %si           # colour white
+    movw    $100, %ax           # x0
+    movw    $84, %bx            # x1
+    movw    $195, %cx           # y0
+    movw    $68, %dx            # y1
     call    Draw_Line           # draw a line
 
 endless_loop:                   # Loop forever more
