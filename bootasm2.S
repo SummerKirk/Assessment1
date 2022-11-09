@@ -292,14 +292,14 @@ real_start:
 
     movw    $6,  %si            # colour orange
     movw    $24, %ax            # x0
-    movw    $24, %bx            # x1
-    movw    $34, %cx            # y0
-    movw    $44, %dx            # y1
+    movw    $84, %bx            # x1
+    movw    $100, %cx           # y0
+    movw    $100, %dx           # y1
     call    Draw_Line           # draw a line
 
     movw    $14,  %si           # colour yellow
     movw    $100, %ax           # x0
-    movw    $84, %bx            # x1
+    movw    $100, %bx           # x1
     movw    $95, %cx            # y0
     movw    $48, %dx            # y1
     call    Draw_Line           # draw a line
