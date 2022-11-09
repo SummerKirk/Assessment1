@@ -137,7 +137,7 @@ Absoloute_Y:
 # example of jump then set the result
 
     movw    y1(%bp), %ax        # y1 into ax
-    movw    y0(%bp), %dx
+    movw    y0(%bp), %dx        # y0 into dx
     sub     %dx, %ax            # yend - ystart, y1 is target
     cmp     $0, %ax             # compare to 0 > ax is target
     jge      StepX_Comp         # when target is greater than 0, it's already positive
@@ -162,8 +162,8 @@ StepY_Comp:
     movw    $-1, stepy(%bp)     # step y to -1
 
 Err_Comp:
-    movw    dvalx(%bp), %ax     # bring dvalx into ax
-    movw    dvaly(%bp), %dx
+    movw    dvalx(%bp), %ax     # bring delta value x into ax
+    movw    dvaly(%bp), %dx     # bring delta y into dx
     subw    %dx, %ax            # err = dx - dy, dvalx is target
     movw    %ax, err(%bp)       # result in ax goes into err
 
