@@ -211,8 +211,8 @@ Re_Calc_Plot_Pixel:
     movw    dvaly(%bp), %dx     # dy into dxreg, dval (delta value y) is -dy
     cmp     e2(%bp), %dx        # e2 > -dy we continue the calculations, dx is target
     jge     E2_Dx_Calc_Plot_Pixel   # when target is more than e2, skip to x calc
-    movw    err(%bp), %ax       # err into ax
 # err recalc
+    movw    err(%bp), %ax       # err into ax
     movw    dvaly(%bp), %dx
     addw    %dx, %ax            # err = err-dy (dy was made negative), err in ax is target
     movw    %ax, err(%bp)       # result in ax into err, err is target
